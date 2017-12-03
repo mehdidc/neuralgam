@@ -10,6 +10,45 @@ from keras.layers.merge import average
 from keras.models import Sequential
 from keras.models import Model
 
+class FullyConnectNeuralGam(object):
+
+    def __init__(self, 
+                 hidden_units=[], 
+                 hidden_activation='relu', 
+                 output_activation='linear', 
+                 features=None, 
+                 optimizer='adam',
+                 loss='mean_squared_error',
+                 epochs=10,
+                 verobse=0):
+
+        self.hidden_units = hidden_units
+        self.hidden_activation = hidden_activation
+        self.output_activaton = output_activation
+        self.features = features
+        self.optimizer = optimizer
+        self.loss = loss
+        self.epochs = epochs
+        self.verbose = verbose
+
+    def fit(self, X, y):
+        input_dim = X.shape[1]
+        output_dim = y.shape[1] if len(y.shape) == 2 else 1
+        _build = partial(
+            _build_single_fully_connected_model, 
+            output_dim=self.output_dim,
+            hidden_units=hidden_units, 
+            hidden_activation=self.hidden_activation,
+            output_activation=self.output_activation,
+        )
+        model = build_gam(input_dim, _build, features=self.features)
+        model.compile(optimizer=self.optimizer, loss=self.loss, verbose=self.verbose)
+        model.fit(X, y, epochs=self.epochs)
+        self.model = model
+
+    def predict(self, X):
+        return self.model.predict(X)
+
 
 def build_fully_connected_gam(input_dim, 
                               output_dim=1, 

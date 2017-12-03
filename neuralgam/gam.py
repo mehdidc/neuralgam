@@ -19,34 +19,40 @@ class FullyConnectNeuralGam(object):
                  features=None, 
                  optimizer='adam',
                  loss='mean_squared_error',
+                 batch_size=128,
                  epochs=10,
-                 verobse=0):
+                 verbose=0):
 
         self.hidden_units = hidden_units
         self.hidden_activation = hidden_activation
-        self.output_activaton = output_activation
+        self.output_activation = output_activation
         self.features = features
         self.optimizer = optimizer
         self.loss = loss
+        self.batch_size = batch_size
         self.epochs = epochs
         self.verbose = verbose
+
+        self.model = None
 
     def fit(self, X, y):
         input_dim = X.shape[1]
         output_dim = y.shape[1] if len(y.shape) == 2 else 1
         _build = partial(
             _build_single_fully_connected_model, 
-            output_dim=self.output_dim,
-            hidden_units=hidden_units, 
+            output_dim=output_dim,
+            hidden_units=self.hidden_units, 
             hidden_activation=self.hidden_activation,
             output_activation=self.output_activation,
         )
         model = build_gam(input_dim, _build, features=self.features)
-        model.compile(optimizer=self.optimizer, loss=self.loss, verbose=self.verbose)
-        model.fit(X, y, epochs=self.epochs)
+        model.compile(optimizer=self.optimizer, loss=self.loss)
+        model.fit(X, y, epochs=self.epochs, verbose=self.verbose, batch_size=self.batch_size)
         self.model = model
+        return self
 
     def predict(self, X):
+        assert self.model, "Model is not fitted, please consider fitting it before calling predict."
         return self.model.predict(X)
 
 
